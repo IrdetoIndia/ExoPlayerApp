@@ -18,6 +18,7 @@ package com.example.exoplayer;
 import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Surface;
@@ -57,7 +58,7 @@ import org.w3c.dom.Text;
 /**
  * A fullscreen activity to play audio or video streams.
  */
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends FragmentActivity {
 
   // bandwidth meter to measure and estimate bandwidth
   private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
@@ -83,26 +84,15 @@ public class PlayerActivity extends AppCompatActivity {
     componentListener = new ComponentListener();
     playerView = findViewById(R.id.video_view);
 
-    tvManifest = (EditText) findViewById(R.id.manifest);
-    tvLicense = (EditText) findViewById(R.id.la_url);
 
-    button = (Button) findViewById(R.id.exo_button);
-    button.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            manifest = tvManifest.getText().toString();
-            licenseUrl = tvLicense.getText().toString();
+    onStop();
+    onStart();
 
-            System.out.println("Manifest : "+ manifest);
-            System.out.println("License URL : "+ licenseUrl);
+    manifest = "https://delta19tatasky.akamaized.net/out/i/134006.mpd";
+    licenseUrl = "https://tatasky.stage.ott.irdeto.com/Widevine/getlicense?CrmId=tatasky&AccountId=tatasky&ContentId=400000053&SessionId=44FC515E23B8F729&Ticket=728077E2D00785C6";
 
-            onStop();
-            onStart();
-
-          MediaSource mediaSource = buildMediaSource(Uri.parse(manifest));
-          player.prepare(mediaSource, true,false);
-        }
-    });
+    MediaSource mediaSource = buildMediaSource(Uri.parse(manifest));
+    player.prepare(mediaSource, true,false);
   }
 
   @Override
@@ -142,35 +132,6 @@ public class PlayerActivity extends AppCompatActivity {
     }
   }
 
-/*  private void initializePlayer() {
-    if (player == null) {
-      // a factory to create an AdaptiveVideoTrackSelection
-      TrackSelection.Factory adaptiveTrackSelectionFactory =
-          new AdaptiveTrackSelection.Factory(BANDWIDTH_METER);
-      // using a DefaultTrackSelector with an adaptive video selection factory
-      player = ExoPlayerFactory.newSimpleInstance(new DefaultRenderersFactory(this),
-          new DefaultTrackSelector(adaptiveTrackSelectionFactory), new DefaultLoadControl());
-      player.addListener(componentListener);
-      player.addVideoDebugListener(componentListener);
-      player.addAudioDebugListener(componentListener);
-      playerView.setPlayer(player);
-      player.setPlayWhenReady(playWhenReady);
-      player.seekTo(currentWindow, playbackPosition);
-
-    }
-    MediaSource mediaSource = buildMediaSource(Uri.parse(getString(R.string.media_url_dash)));
-    player.prepare(mediaSource, true, false);
-  }
-
-  private MediaSource buildMediaSource(Uri uri) {
-    DataSource.Factory manifestDataSourceFactory = new DefaultHttpDataSourceFactory("ua");
-    DashChunkSource.Factory dashChunkSourceFactory = new DefaultDashChunkSource.Factory(
-            new DefaultHttpDataSourceFactory("ua", BANDWIDTH_METER));
-
-    return new DashMediaSource.Factory(dashChunkSourceFactory, manifestDataSourceFactory)
-            .createMediaSource(uri);
-  }*/
-
   private void initializePlayer() {
     if (player == null) {
       // a factory to create an AdaptiveVideoTrackSelection
@@ -184,11 +145,7 @@ public class PlayerActivity extends AppCompatActivity {
       playerView.setPlayer(player);
       player.setPlayWhenReady(playWhenReady);
       player.seekTo(currentWindow, playbackPosition);
-
     }
-    //String manifest = getString(R.string.tatasky_manifest);
-    //MediaSource mediaSource = buildMediaSource(Uri.parse(manifest));
-    //player.prepare(mediaSource, true,false);
   }
 
   private MediaSource buildMediaSource(Uri uri) {
@@ -200,22 +157,21 @@ public class PlayerActivity extends AppCompatActivity {
   private DefaultDrmSessionManager<FrameworkMediaCrypto> getDrmSessionManager(){
     DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
     try {
-        //String licenseUrl = getString(R.string.tatasky_widevine);
-        MediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl, new DefaultHttpDataSourceFactory("ua"));
-        drmSessionManager = DefaultDrmSessionManager.newWidevineInstance(drmCallback, null, null, null);
-        drmSessionManager.setPropertyString("securityLevel", "L3"); // !useL1Widevine
-      //drmSessionManager.setMode(DefaultDrmSessionManager.MODE_PLAYBACK, offlineLicenseKeySetId //offlineLicenseKeySetId != null
+      licenseUrl = "https://tatasky.stage.ott.irdeto.com/Widevine/getlicense?CrmId=tatasky&AccountId=tatasky&ContentId=400000024&SessionId=DFAA0A8161653A6E&Ticket=24942CF76FCA7B0E";
+      MediaDrmCallback drmCallback = new HttpMediaDrmCallback(licenseUrl, new DefaultHttpDataSourceFactory("ua"));
+      drmSessionManager = DefaultDrmSessionManager.newWidevineInstance(drmCallback, null, null, null);
+      drmSessionManager.setPropertyString("securityLevel", "L3"); // !useL1Widevine
     }catch(Exception e){
     }
     return drmSessionManager;
   }
 
-    @Override
-    public void onLocalVoiceInteractionStarted() {
-        super.onLocalVoiceInteractionStarted();
-    }
+  @Override
+  public void onLocalVoiceInteractionStarted() {
+    super.onLocalVoiceInteractionStarted();
+  }
 
-    private void releasePlayer() {
+  private void releasePlayer() {
     if (player != null) {
       playbackPosition = player.getCurrentPosition();
       currentWindow = player.getCurrentWindowIndex();
@@ -231,15 +187,15 @@ public class PlayerActivity extends AppCompatActivity {
   @SuppressLint("InlinedApi")
   private void hideSystemUi() {
     playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-        | View.SYSTEM_UI_FLAG_FULLSCREEN
-        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
   }
 
   private class ComponentListener extends Player.DefaultEventListener implements
-      VideoRendererEventListener, AudioRendererEventListener {
+          VideoRendererEventListener, AudioRendererEventListener {
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
